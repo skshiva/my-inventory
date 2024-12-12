@@ -1,9 +1,23 @@
 <template>
-  <v-container>
+  <VContainer>
+    <VBreadcrumbs :items="breadItems">
+      <template #divider>
+        <VIcon icon="mdi-chevron-right" />
+      </template>
+    </VBreadcrumbs>
     <h1>Inventory Management</h1>
-    <v-btn @click="showAddForm = true" color="primary" class="mb-4">Add Item</v-btn>
+    <VBtn
+      color="primary"
+      class="mb-4"
+      @click="showAddForm = true"
+    >
+      Add Item
+    </VBtn>
 
-    <AddItemForm v-if="showAddForm" @close="showAddForm = false" />
+    <AddItemForm
+      v-if="showAddForm"
+      @close="showAddForm = false"
+    />
 
     <InventoryList
       :items="inventoryItems"
@@ -16,7 +30,7 @@
       :item="currentEditItem"
       @close="closeEditForm"
     />
-  </v-container>
+  </VContainer>
 </template>
 
 <script setup>
@@ -28,7 +42,18 @@ import InventoryList from '@/components/Inventory/InventoryList.vue';
 
 const store = useInventoryStore();
 const inventoryItems = store.fetchItems();
-
+const breadItems = [
+        {
+          title: 'Dashboard',
+          disabled: false,
+          href: '/',
+        },
+        {
+          title: 'Inventory Listing',
+          disabled: true,
+          href: '/admin/inventory',
+        },
+      ]
 const showAddForm = ref(false);
 const showEditForm = ref(false);
 const currentEditItem = ref(null);

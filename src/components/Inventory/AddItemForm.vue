@@ -1,36 +1,91 @@
 <template>
-  <v-dialog v-model="dialog" persistent max-width="600px">
+  <VDialog
+    v-model="dialog"
+    persistent
+    max-width="600px"
+  >
     <template #activator="{ props }">
-      <v-btn v-bind="props" color="primary">Add Item</v-btn>
+      <VBtn
+        v-bind="props"
+        color="primary"
+      >
+        Add Item
+      </VBtn>
     </template>
-    <v-card>
-      <v-card-title>Add New Item</v-card-title>
-      <v-card-text>
-        <v-form ref="form" v-model="valid">
-          <v-text-field v-model="item.name" label="Name" required />
-          <v-text-field v-model="item.description" label="Description" required />
-          <v-text-field v-model="item.price" label="Price" type="number" required />
-        </v-form>
-      </v-card-text>
-      <v-card-actions>
-        <v-btn @click="submit" :disabled="!valid" color="green">Add</v-btn>
-        <v-btn @click="$emit('close')" color="red">Cancel</v-btn>
-      </v-card-actions>
-    </v-card>
-  </v-dialog>
+    <VCard>
+      <VCardTitle>Add New Item</VCardTitle>
+      <VCardText>
+        <VForm
+          ref="form"
+          v-model="valid"
+        >
+          <VTextField
+            v-model="item.name"
+            label="Name"
+            :rules="[v => !!v || 'Name is required']"
+            required
+          />
+          <VTextField
+            v-model="item.description"
+            label="Description"
+            :rules="[v => !!v || 'Description is required']"
+            required
+          />
+          <VTextField
+            v-model="item.price"
+            label="Price"
+            type="number"
+            :rules="[v => v > 0 || 'Price must be positive']"
+            required
+          />
+        </VForm>
+      </VCardText>
+      <VCardActions>
+        <VBtn
+          :disabled="!valid"
+          color="green"
+          @click="submit"
+        >
+          Add
+        </VBtn>
+        <VBtn
+          color="red"
+          @click="closeDialog"
+        >
+          Cancel
+        </VBtn>
+      </VCardActions>
+    </VCard>
+  </VDialog>
 </template>
 
 <script setup>
 import { ref } from 'vue';
 import { useInventoryStore } from '@/stores/inventory';
 
-const store = useInventoryStore();
-
+const dialog = ref(false);
 const item = ref({ name: '', description: '', price: '' });
 const valid = ref(false);
+const store = useInventoryStore();
+const emit = defineEmits(['close']);
 
-const submit = () => {
-  store.addItem(item.value);
-  $emit('close');
+const resetForm = () => {
+  item.value = { name: '', description: '', price: '' };
+  valid.value = false;
+};
+
+const submit = async () => {
+  try {
+    await store.addItem(item.value);
+    resetForm();
+    emit('close');
+  } catch (error) {
+    console.error('Error adding item:', error);
+  }
+};
+
+const closeDialog = () => {
+  resetForm();
+  emit('close');
 };
 </script>
